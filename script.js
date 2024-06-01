@@ -81,7 +81,7 @@ function startGame() {
                 playersRef.child(player.id).update({ role: role });
             });
 
-            gameRef.set({ status: 'started', blank: blankPlayerId, endTime: Date.now() + 500 });
+            gameRef.set({ status: 'started', blank: blankPlayerId, endTime: Date.now() + 90000 });
         });
       })
       .catch(error => console.error('Error al obtener palabra aleatoria:', error));
@@ -91,8 +91,8 @@ function startGame() {
 function displayPlayerRole() {
     playersRef.child(playerId).child('role').on('value', (snapshot) => {
         const role = snapshot.val();
-        const playerInfoDiv = document.getElementById('player-info');
-        playerInfoDiv.innerText = `Tu tema: ${role === 'blanco' ? 'Blanco' : role}`;
+        const playerInfo = document.getElementById('player-info');
+        playerInfo.innerText = `Tu tema: ${role === 'blanco' ? 'Blanco' : role}`;
     });
 }
 

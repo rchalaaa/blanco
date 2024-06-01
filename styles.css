@@ -1,24 +1,69 @@
 /* styles.css */
 body {
-    font-family: Arial, sans-serif;
+    font-family: Poppins, sans-serif;
     display: flex;
     justify-content: center;
     align-items: center;
     height: 100vh;
+    box-sizing: border-box;
     margin: 0;
-    background-color: #f0f0f0;
+    background-color: #f4f4f4;
+}
+
+h2{
+    margin: 0;
 }
 
 .container {
     text-align: center;
     background: white;
-    padding: 20px;
+    margin: 20px;
+    max-width: 470px;
+    padding: 30px;
     border-radius: 10px;
+    border: 1px solid #ddd;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
+#player-name{
+    font-size: 16px;
+    height: 15px;
+    width: 70%;
+    border: 1px solid #adadad;
+    border-radius: 25px;
+    padding: 12px;
+}
+
+#ready-button{
+    width: 30%;
+}
+
+
+.name-input{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    gap: 10px;
+}
+
+#player-info{
+    margin-bottom: 25px;
+
+}
+
+.header{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
 button {
-    margin: 10px;
+    background-color: white;
+    border: 1px solid #adadad;
+    border-radius: 10px;
     padding: 10px 20px;
     font-size: 16px;
     cursor: pointer;
