@@ -20,14 +20,19 @@ let playerId = null;
 let playerCount = 0;
 
 document.getElementById('ready-button').addEventListener('click', () => {
-    const playerName = document.getElementById('player-name').value.trim();
+    const playerNameInput = document.getElementById('player-name');
+    const playerName = playerNameInput.value.trim();
+
     if (!playerName) {
         alert('Por favor, ingresa tu nombre antes de continuar.');
         return;
     }
+
     if (!playerId) {
         checkAndSetPlayerId(playerName);
     }
+
+    playerNameInput.setAttribute('disabled', 'true');
 });
 
 function checkAndSetPlayerId(playerName) {
@@ -46,7 +51,7 @@ function checkAndSetPlayerId(playerName) {
 
 playersRef.on('value', (snapshot) => {
     playerCount = snapshot.numChildren();
-    document.getElementById('player-count').innerText = `Jugadores listos: ${playerCount}`;
+    document.getElementById('player-count').innerText = `Jugadores: ${playerCount}`;
 });
 
 document.getElementById('start-game-button').addEventListener('click', () => {
@@ -81,7 +86,7 @@ function startGame() {
                 playersRef.child(player.id).update({ role: role });
             });
 
-            gameRef.set({ status: 'started', blank: blankPlayerId, endTime: Date.now() + 90000 });
+            gameRef.set({ status: 'started', blank: blankPlayerId, endTime: Date.now() + 500 });
         });
       })
       .catch(error => console.error('Error al obtener palabra aleatoria:', error));
@@ -214,7 +219,7 @@ displayGameStatus();
 function resetGame() {
     playersRef.remove();
     gameRef.remove();
-    document.getElementById('player-count').innerText = 'Jugadores listos: 0';
+    document.getElementById('player-count').innerText = 'Jugadores: 0';
     document.getElementById('game-status').innerText = '';
     document.getElementById('voting-area').innerHTML = '';
     document.getElementById('player-info').innerHTML = ''; // Limpiar la información del jugador

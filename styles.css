@@ -8,40 +8,70 @@ body {
     box-sizing: border-box;
     margin: 0;
     background-color: #f4f4f4;
+    overflow: hidden;
 }
 
 h2{
     margin: 0;
+    margin-right: 10px;
 }
 
 .container {
+    display: flex;
+    flex: auto;
+    flex-direction: column;
     text-align: center;
     background: white;
     margin: 20px;
     max-width: 470px;
-    padding: 30px;
+    padding: 20px;
     border-radius: 10px;
     border: 1px solid #ddd;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
 #player-name{
-    font-size: 16px;
+    font-size: 14px;
     height: 15px;
     width: 70%;
+    max-width: 250px;
     border: 1px solid #adadad;
     border-radius: 25px;
     padding: 12px;
 }
 
-#ready-button{
-    width: 30%;
+input[disabled]{
+    background-color: #ececec;
 }
 
 
+#ready-button{
+    width: 30%;
+    max-width: 80px;
+}
+
+#reset-game-button{
+    right: 0;
+    display: flex;
+    align-self: flex-end;
+    align-items: center;
+    justify-content: center;
+    border: 0;
+    color: white;
+    background-color: #d53434;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+}
+
+#start-game-button{
+    width: 160px;
+    align-self: center;
+}
+
 .name-input{
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
     flex-direction: row;
     flex-wrap: nowrap;
@@ -61,12 +91,14 @@ h2{
 }
 
 button {
+    font-family: Poppins;
     background-color: white;
     border: 1px solid #adadad;
     border-radius: 10px;
-    padding: 10px 20px;
-    font-size: 16px;
+    padding: 10px 15px;
+    font-size: 14px;
     cursor: pointer;
+    color: black;
 }
 
 #game-status {
