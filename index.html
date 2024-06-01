@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Juego del Blanco</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Juego del Blanco</h1>
+        <div id="player-count">Jugadores listos: 0</div>
+        <input type="text" id="player-name" placeholder="Ingresa tu nombre">
+        <button id="ready-button">Listo</button>
+        <button id="start-game-button">Empezar Partida</button>
+        <button id="reset-game-button">Reiniciar Partida</button>
+        <div id="player-info"></div>
+        <div id="game-status"></div>
+        
+    </div>
+    
+    <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-database.js"></script>
+    <script src="script.js"></script>
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        // TODO: Add SDKs for Firebase products that you want to use
+        // https://firebase.google.com/docs/web/setup#available-libraries
+      
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+          apiKey: "AIzaSyCy_wVXTYulJj-nRqWZv-h4mR3DbJjfTjg",
+          authDomain: "blanco-e8ad6.firebaseapp.com",
+          projectId: "blanco-e8ad6",
+          storageBucket: "blanco-e8ad6.appspot.com",
+          messagingSenderId: "845788160191",
+          appId: "1:845788160191:web:05354fd6e3a55cdd84660a"
+        };
+      
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+      </script>
+    
+</body>
+</html>
