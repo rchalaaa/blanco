@@ -42,22 +42,6 @@
         <div id="game-status"></div>
         <button id="reset-game-button"><span class="material-symbols-outlined">refresh</span></button>
     </div>
-    <script>
-        // Obtener referencias a los divs de opciones
-        const optionClown = document.getElementById('option-clown');
-        const optionBlank = document.getElementById('option-blank');
-
-        // Agregar el evento click a los divs de opciones
-        optionClown.addEventListener('click', () => {
-            // Mostrar el desplegable de payasos al hacer clic en el div
-            document.getElementById('clowns').click();
-        });
-
-        optionBlank.addEventListener('click', () => {
-            // Mostrar el desplegable de blancos al hacer clic en el div
-            document.getElementById('blanks').click();
-        });
-    </script>
     <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-database.js"></script>
     <script src="script.js"></script>
