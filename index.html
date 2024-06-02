@@ -3,9 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Juego del Blanco</title>
-    <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/rchalaaa/blanco/main/favicon.png">
-    <link rel="apple-touch-icon" type="image/png" href="https://raw.githubusercontent.com/rchalaaa/blanco/main/favicon.png">
+    <title>Blanco</title>
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -20,7 +18,7 @@
         </div>
         <div class="options">
             <div id="option-clown">
-                <img src="https://raw.githubusercontent.com/rchalaaa/blanco/main/clown.webp">
+                <img src="/clown.webp">
                 <select id="clowns">
                     <option value="0">0</option>
                     <option value="1">1</option>
@@ -28,7 +26,7 @@
                 </select>
             </div>
             <div id="option-blank">
-                <img src="https://raw.githubusercontent.com/rchalaaa/blanco/main/BLANCO.webp">
+                <img src="/BLANCO.webp">
                 <select id="blanks">
                     <option value="1">1</option>
                     <option value="2">2</option>
@@ -39,27 +37,21 @@
             <input type="text" id="player-name" placeholder="Pon tu nombre casquin">
             <button id="ready-button">Listo</button>
         </div>
-        <p id="player-info"></p>
         <button id="start-game-button">Empezar Partida</button>
-        <div id="game-status"></div>
+        <div id="game-info" style="display: none;">
+            <p id="player-info"></p>
+            <div id="game-status"></div>
+        </div>
         <button id="reset-game-button"><span class="material-symbols-outlined">refresh</span></button>
     </div>
+    <script>
+        document.getElementById('reset-game-button').addEventListener('click', () => {
+            document.getElementById('game-info').style.display = 'none';
+        });
+        
+    </script>
     <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-database.js"></script>
     <script src="script.js"></script>
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-        
-        const firebaseConfig = {
-          apiKey: "YOUR_API_KEY",
-          authDomain: "YOUR_AUTH_DOMAIN",
-          projectId: "YOUR_PROJECT_ID",
-          storageBucket: "YOUR_STORAGE_BUCKET",
-          messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-          appId: "YOUR_APP_ID"
-        };
-      
-        const app = initializeApp(firebaseConfig);
-      </script>
 </body>
 </html>

@@ -1,14 +1,18 @@
 /* styles.css */
+
+html{
+    height: -webkit-fill-available;
+}
 body {
     font-family: Poppins, sans-serif;
     display: flex;
     justify-content: center;
     align-items: center;
     height: 100vh;
+    height: -webkit-fill-available;
     box-sizing: border-box;
     margin: 0;
     background-color: #f4f4f4;
-    overflow: hidden;
 }
 
 h2{
@@ -67,6 +71,7 @@ input[disabled]{
 #start-game-button{
     width: 160px;
     align-self: center;
+    margin-bottom: 15px;
 }
 
 .name-input{
@@ -75,15 +80,21 @@ input[disabled]{
     align-items: center;
     flex-direction: row;
     flex-wrap: nowrap;
+    margin-bottom: 15px;
     gap: 10px;
 }
 
 #player-info{
-    margin-bottom: 25px;
     text-transform: uppercase;
     font-size: 22px;
     font-weight: 800;
+    margin: 0;
+    margin-top: 5px;
+    margin-bottom: 15px;
+}
 
+#game-info{
+    margin-bottom: 15px;
 }
 
 .header{
@@ -138,6 +149,6 @@ button {
     color: black;
 }
 
-#game-status {
-    margin-top: 20px;
+#voting-area{
+    margin-top: 15px;
 }

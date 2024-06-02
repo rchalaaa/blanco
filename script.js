@@ -22,14 +22,15 @@ let playerCount = 0;
 document.getElementById('ready-button').addEventListener('click', () => {
     const playerNameInput = document.getElementById('player-name');
     const playerName = playerNameInput.value.trim();
-
     if (!playerName) {
         alert('Por favor, ingresa tu nombre antes de continuar.');
         return;
     }
 
     if (!playerId) {
+        console.log(playerId)
         checkAndSetPlayerId(playerName);
+        
     }
 
     playerNameInput.setAttribute('disabled', 'true');
@@ -42,6 +43,7 @@ function checkAndSetPlayerId(playerName) {
             playerId = `${playerName}_${suffix}`;
         } else {
             playerId = playerName;
+            
         }
         playersRef.child(playerId).set({ name: playerName, ready: true, isOut: false });
         displayPlayerRole();
@@ -67,57 +69,73 @@ document.getElementById('reset-game-button').addEventListener('click', () => {
 
 function startGame() {
     fetch('https://random-word-api.herokuapp.com/word?lang=es')
-      .then(response => response.json())
-      .then(data => {
-        const theme = data[0];
+        .then(response => response.json())
+        .then(data => {
+            const theme = data[0];
 
-        gameRef.once('value', (snapshot) => {
-            const gameData = snapshot.val();
-            const clownsCount = parseInt(gameData.clowns, 10);
-            const blanksCount = parseInt(gameData.blanks, 10);
-            const roles = Array(playerCount - clownsCount - blanksCount).fill(theme).concat(
-                Array(clownsCount).fill('Payaso'),
-                Array(blanksCount).fill('blanco')
-            );
+            gameRef.once('value', (snapshot) => {
+                const gameData = snapshot.val();
+                const clownsCount = parseInt(gameData.clowns, 10);
+                const blanksCount = parseInt(gameData.blanks, 10);
+                const roles = Array(playerCount - clownsCount - blanksCount).fill(theme).concat(
+                    Array(clownsCount).fill('Payaso'),
+                    Array(blanksCount).fill('Blanco')
+                );
 
-            playersRef.once('value', (snapshot) => {
-                const players = [];
-                snapshot.forEach(childSnapshot => {
-                    players.push({ id: childSnapshot.key, data: childSnapshot.val() });
+                playersRef.once('value', (snapshot) => {
+                    const players = [];
+                    snapshot.forEach(childSnapshot => {
+                        players.push({ id: childSnapshot.key, data: childSnapshot.val() });
+                    });
+
+                    roles.sort(() => Math.random() - 0.5); // Mezclar roles
+
+                    players.forEach((player, index) => {
+                        playersRef.child(player.id).update({ role: roles[index], votes: 0 }); // Reiniciar votos a 0
+                    });
+
+                    gameRef.update({ status: 'started', endTime: Date.now() + 500 });
                 });
-
-                roles.sort(() => Math.random() - 0.5); // Mezclar roles
-
-                players.forEach((player, index) => {
-                    playersRef.child(player.id).update({ role: roles[index] });
-                });
-
-                gameRef.update({ status: 'started', endTime: Date.now() + 500 });
             });
-        });
-      })
-      .catch(error => console.error('Error al obtener palabra aleatoria:', error));
+        })
+        .catch(error => console.error('Error al obtener palabra aleatoria:', error));
 }
 
 function displayPlayerRole() {
     playersRef.child(playerId).child('role').on('value', (snapshot) => {
         const role = snapshot.val();
         const playerInfo = document.getElementById('player-info');
-        playerInfo.innerText = `${role === 'blanco' ? 'Blanco' : role}`;
+        playerInfo.innerText = `${role === 'Blanco' ? 'Blanco' : role}`;
     });
 }
+
+gameRef.child('status').on('value', (snapshot) => {
+    const statusMessage = snapshot.val();
+    if (statusMessage) {
+        document.getElementById('game-status').innerText = statusMessage;
+        if (statusMessage === 'reset') {
+            document.getElementById('game-info').style.display = 'none';
+        } else {
+            document.getElementById('game-info').style.display = 'block';
+        }
+    }
+});
 
 gameRef.on('value', (snapshot) => {
     const gameData = snapshot.val();
     if (gameData && gameData.status === 'started') {
-        document.getElementById('game-status').innerText = 'La partida ha comenzado. Hable sobre el tema sin decirlo explícitamente.';
+        document.getElementById('game-status').innerText = 'La partida ha comenzado. Habla sobre el tema sin decirlo explícitamente.';
         setTimeout(initiateVoting, gameData.endTime - Date.now());
+
+        // Cambiar display de game-info a block
+        document.getElementById('game-info').style.display = 'block';
+       
     }
 });
 
 function initiateVoting() {
     document.getElementById('game-status').innerHTML = `
-        La conversación ha terminado. Vota quién crees que es el blanco:
+        La conversación ha terminado. Vota quién crees que es el Blanco:
         <div id="voting-area"></div>
     `;
     playersRef.once('value', (snapshot) => {
@@ -197,8 +215,8 @@ function determineOutcome() {
         } else if (votedOutPlayer) {
             const { id, role } = votedOutPlayer;
             playersRef.child(id).update({ isOut: true }).then(() => {
-                if (role === 'blanco') {
-                    updateGameStatus(`${id} ha sido expulsado. Era el blanco.`);
+                if (role === 'Blanco') {
+                    updateGameStatus(`${id} ha sido expulsado. Era el Blanco.`);
                 } else if (role === 'payaso') {
                     updateGameStatus(`${id} ha sido expulsado. Era el payaso y ha ganado la partida.`);
                 } else {
@@ -229,8 +247,8 @@ displayGameStatus();
 function resetGame() {
     playersRef.remove();
     gameRef.remove().then(() => {
-        // Después de borrar el gameRef, establecer valores por defecto de clowns y blanks
-        gameRef.set({ clowns: 0, blanks: 1 }); 
+        // Después de borrar el gameRef, establecer valores por defecto de clowns, blanks y reset
+        gameRef.set({ clowns: 0, blanks: 1, status:'reset' });
     });
     document.getElementById('player-count').innerText = '0';
     document.getElementById('game-status').innerText = '';
