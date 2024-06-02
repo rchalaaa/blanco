@@ -44,14 +44,13 @@ function checkAndSetPlayerId(playerName) {
             playerId = playerName;
         }
         playersRef.child(playerId).set({ name: playerName, ready: true, isOut: false });
-        // Configurar oyente para mostrar el rol en tiempo real
         displayPlayerRole();
     });
 }
 
 playersRef.on('value', (snapshot) => {
     playerCount = snapshot.numChildren();
-    document.getElementById('player-count').innerText = `Jugadores: ${playerCount}`;
+    document.getElementById('player-count').innerText = `${playerCount}`;
 });
 
 document.getElementById('start-game-button').addEventListener('click', () => {
@@ -67,37 +66,44 @@ document.getElementById('reset-game-button').addEventListener('click', () => {
 });
 
 function startGame() {
-    // Usar la API de Random Word para obtener una palabra aleatoria
     fetch('https://random-word-api.herokuapp.com/word?lang=es')
       .then(response => response.json())
       .then(data => {
         const theme = data[0];
 
-        playersRef.once('value', (snapshot) => {
-            const players = [];
-            snapshot.forEach(childSnapshot => {
-                players.push({ id: childSnapshot.key, data: childSnapshot.val() });
+        gameRef.once('value', (snapshot) => {
+            const gameData = snapshot.val();
+            const clownsCount = parseInt(gameData.clowns, 10);
+            const blanksCount = parseInt(gameData.blanks, 10);
+            const roles = Array(playerCount - clownsCount - blanksCount).fill(theme).concat(
+                Array(clownsCount).fill('Payaso'),
+                Array(blanksCount).fill('blanco')
+            );
+
+            playersRef.once('value', (snapshot) => {
+                const players = [];
+                snapshot.forEach(childSnapshot => {
+                    players.push({ id: childSnapshot.key, data: childSnapshot.val() });
+                });
+
+                roles.sort(() => Math.random() - 0.5); // Mezclar roles
+
+                players.forEach((player, index) => {
+                    playersRef.child(player.id).update({ role: roles[index] });
+                });
+
+                gameRef.update({ status: 'started', endTime: Date.now() + 500 });
             });
-
-            const blankPlayerId = players[Math.floor(Math.random() * players.length)].id;
-
-            players.forEach(player => {
-                const role = player.id === blankPlayerId ? 'blanco' : theme;
-                playersRef.child(player.id).update({ role: role });
-            });
-
-            gameRef.set({ status: 'started', blank: blankPlayerId, endTime: Date.now() + 500 });
         });
       })
       .catch(error => console.error('Error al obtener palabra aleatoria:', error));
 }
 
-
 function displayPlayerRole() {
     playersRef.child(playerId).child('role').on('value', (snapshot) => {
         const role = snapshot.val();
         const playerInfo = document.getElementById('player-info');
-        playerInfo.innerText = `Tu tema: ${role === 'blanco' ? 'Blanco' : role}`;
+        playerInfo.innerText = `${role === 'blanco' ? 'Blanco' : role}`;
     });
 }
 
@@ -191,12 +197,17 @@ function determineOutcome() {
         } else if (votedOutPlayer) {
             const { id, role } = votedOutPlayer;
             playersRef.child(id).update({ isOut: true }).then(() => {
-                updateGameStatus(`El jugador ${id} ha sido expulsado. ${role === 'blanco' ? 'Era el blanco.' : 'No era el blanco.'}`);
+                if (role === 'blanco') {
+                    updateGameStatus(`${id} ha sido expulsado. Era el blanco.`);
+                } else if (role === 'payaso') {
+                    updateGameStatus(`${id} ha sido expulsado. Era el payaso y ha ganado la partida.`);
+                } else {
+                    updateGameStatus(`${id} ha sido expulsado. Tenía tema.`);
+                }
             });
         }
     });
 }
-
 
 function updateGameStatus(statusMessage) {
     gameRef.update({ status: statusMessage }).then(() => {
@@ -213,16 +224,43 @@ function displayGameStatus() {
     });
 }
 
-// Llamar a displayGameStatus una vez al cargar la página para asegurarse de que todos vean el estado actual
 displayGameStatus();
 
 function resetGame() {
     playersRef.remove();
-    gameRef.remove();
-    document.getElementById('player-count').innerText = 'Jugadores: 0';
+    gameRef.remove().then(() => {
+        // Después de borrar el gameRef, establecer valores por defecto de clowns y blanks
+        gameRef.set({ clowns: 0, blanks: 1 }); 
+    });
+    document.getElementById('player-count').innerText = '0';
     document.getElementById('game-status').innerText = '';
     document.getElementById('voting-area').innerHTML = '';
-    document.getElementById('player-info').innerHTML = ''; // Limpiar la información del jugador
+    document.getElementById('player-info').innerHTML = ''; 
     playerId = null;
     playerCount = 0;
 }
+
+// Actualización en tiempo real de clowns y blanks
+const clownsSelect = document.getElementById('clowns');
+const blanksSelect = document.getElementById('blanks');
+
+clownsSelect.addEventListener('change', (event) => {
+    gameRef.update({ clowns: event.target.value });
+});
+
+blanksSelect.addEventListener('change', (event) => {
+    gameRef.update({ blanks: event.target.value });
+});
+
+// Inicializar valores de clowns y blanks en el frontend
+gameRef.on('value', (snapshot) => {
+    const gameData = snapshot.val();
+    if (gameData) {
+        if (gameData.clowns !== undefined) {
+            clownsSelect.value = gameData.clowns;
+        }
+        if (gameData.blanks !== undefined) {
+            blanksSelect.value = gameData.blanks;
+        }
+    }
+});
