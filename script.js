@@ -68,10 +68,12 @@ document.getElementById('reset-game-button').addEventListener('click', () => {
 });
 
 function startGame() {
-    fetch('https://random-word-api.herokuapp.com/word?lang=es')
+    fetch('words.json')
         .then(response => response.json())
         .then(data => {
-            const theme = data[0];
+            const words = data.words;
+            const randomIndex = Math.floor(Math.random() * words.length);
+            const theme = words[randomIndex];
 
             gameRef.once('value', (snapshot) => {
                 const gameData = snapshot.val();
@@ -98,9 +100,8 @@ function startGame() {
                 });
             });
         })
-        .catch(error => console.error('Error al obtener palabra aleatoria:', error));
+        .catch(error => console.error('Error al obtener palabra aleatoria del archivo JSON:', error));
 }
-
 function displayPlayerRole() {
     playersRef.child(playerId).child('role').on('value', (snapshot) => {
         const role = snapshot.val();
