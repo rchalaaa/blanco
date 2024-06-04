@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Blanco</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="icon" href="https://raw.githubusercontent.com/rchalaaa/blanco/main/favicon.png">
+    <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/rchalaaa/blanco/main/favicon.png">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -14,11 +16,13 @@
     <div class="container">
         <div class="header">
             <h2>Blanco</h2>
-            <div id="player-count-text">Jugadores: <strong id="player-count">0</strong></div>
+            <div id="player-count-text">
+                <svg data-id="5" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="jugadores"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                Jugadores:&nbsp;<strong id="player-count">0</strong></div>
         </div>
         <div class="options">
             <div id="option-clown">
-                <img src="https://github.com/rchalaaa/blanco/blob/main/clown.webp">
+                <img src="https://raw.githubusercontent.com/rchalaaa/blanco/main/clown.webp">
                 <select id="clowns">
                     <option value="0">0</option>
                     <option value="1">1</option>
@@ -26,7 +30,7 @@
                 </select>
             </div>
             <div id="option-blank">
-                <img src="https://github.com/rchalaaa/blanco/blob/main/BLANCO.webp">
+                <img src="https://raw.githubusercontent.com/rchalaaa/blanco/main/BLANCO.webp">
                 <select id="blanks">
                     <option value="1">1</option>
                     <option value="2">2</option>
@@ -35,9 +39,13 @@
         </div>
         <div class="name-input">
             <input type="text" id="player-name" placeholder="Pon tu nombre casquin">
-            <button id="ready-button">Listo</button>
+            
         </div>
-        <button id="start-game-button">Empezar Partida</button>
+        <div class="ready-buttons">
+            <button id="ready-button">Listo</button>
+            <button id="start-game-button">Empezar Partida</button>
+        </div>
+        
         <div id="game-info" style="display: none;">
             <p id="player-info"></p>
             <div id="game-status"></div>

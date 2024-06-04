@@ -5,6 +5,7 @@ html{
 }
 body {
     font-family: Poppins, sans-serif;
+    font-weight: 500;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -28,19 +29,28 @@ h2{
     background: white;
     margin: 20px;
     max-width: 470px;
-    padding: 20px;
+    padding: 30px;
     border-radius: 10px;
     border: 1px solid #ddd;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
+#player-count-text{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.jugadores{
+    margin-right: 8px;
+}
+
 #player-name{
     font-size: 14px;
     height: 15px;
-    width: 70%;
-    max-width: 250px;
-    border: 1px solid #adadad;
-    border-radius: 25px;
+    width: 100%;
+    border: 1px solid #d6d6d6;
+    border-radius: 10px;
     padding: 12px;
 }
 
@@ -51,13 +61,16 @@ input[disabled]{
 
 #ready-button{
     width: 30%;
-    max-width: 80px;
+    border: 0;
+    background-color: black;
+    color: white;
 }
 
 #reset-game-button{
-    right: 0;
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
     display: flex;
-    align-self: flex-end;
     align-items: center;
     justify-content: center;
     border: 0;
@@ -69,9 +82,8 @@ input[disabled]{
 }
 
 #start-game-button{
-    width: 160px;
-    align-self: center;
-    margin-bottom: 15px;
+    width: 70%;
+
 }
 
 .name-input{
@@ -79,9 +91,15 @@ input[disabled]{
     justify-content: center;
     align-items: center;
     flex-direction: row;
+    width: 100%;
     flex-wrap: nowrap;
-    margin-bottom: 15px;
-    gap: 10px;
+    margin-bottom: 20px;
+}
+.ready-buttons{
+    display: flex;
+    flex-direction: row;
+    gap: 15px;
+    margin-bottom: 20px;
 }
 
 #player-info{
@@ -90,24 +108,24 @@ input[disabled]{
     font-weight: 800;
     margin: 0;
     margin-top: 5px;
-    margin-bottom: 15px;
+    margin-bottom: 20px;
 }
 
 #game-info{
-    margin-bottom: 15px;
+    margin-bottom: 20px;
 }
 
 .header{
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 15px;
+    margin-bottom: 20px;
 }
 
 .options{
     display: flex;
     flex-direction: row;
-    margin-bottom: 15px;
+    margin-bottom: 20px;
     justify-content: space-around;
     gap: 15px;
 }
@@ -140,8 +158,9 @@ select{
 
 button {
     font-family: Poppins;
+    font-weight: 500;
     background-color: white;
-    border: 1px solid #adadad;
+    border: 1px solid #d6d6d6;
     border-radius: 10px;
     padding: 10px 15px;
     font-size: 14px;
@@ -150,5 +169,5 @@ button {
 }
 
 #voting-area{
-    margin-top: 15px;
+    margin-top: 20px;
 }
