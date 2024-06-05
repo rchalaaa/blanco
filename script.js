@@ -218,7 +218,7 @@ function determineOutcome() {
             playersRef.child(id).update({ isOut: true }).then(() => {
                 if (role === 'Blanco') {
                     updateGameStatus(`${id} ha sido expulsado. Era el Blanco.`);
-                } else if (role === 'payaso') {
+                } else if (role === 'Payaso') {
                     updateGameStatus(`${id} ha sido expulsado. Era el payaso y ha ganado la partida.`);
                 } else {
                     updateGameStatus(`${id} ha sido expulsado. Tenía tema.`);
