@@ -45,6 +45,11 @@ h2{
     margin-right: 8px;
 }
 
+.timer-icon{
+    width: 24px;
+    height: 24px;
+}
+
 #player-name{
     font-size: 14px;
     height: 15px;
@@ -79,6 +84,25 @@ input[disabled]{
     width: 40px;
     height: 40px;
     padding: 0;
+}
+
+#countdown{
+    position: absolute;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    bottom: 20px;
+    left: 20px;
+    background-color: black;
+    color: white;
+    height: 20px;
+    border-radius: 10px;
+    padding: 10px;
+}
+
+#timer{
+    width: 50px;
+    margin-left: 8px;
 }
 
 #start-game-button{

@@ -18,6 +18,7 @@ const gameRef = db.ref('game');
 
 let playerId = null;
 let playerCount = 0;
+let countdownTimer;
 
 document.getElementById('ready-button').addEventListener('click', () => {
     const playerNameInput = document.getElementById('player-name');
@@ -28,9 +29,7 @@ document.getElementById('ready-button').addEventListener('click', () => {
     }
 
     if (!playerId) {
-        console.log(playerId)
         checkAndSetPlayerId(playerName);
-        
     }
 
     playerNameInput.setAttribute('disabled', 'true');
@@ -43,7 +42,6 @@ function checkAndSetPlayerId(playerName) {
             playerId = `${playerName}_${suffix}`;
         } else {
             playerId = playerName;
-            
         }
         playersRef.child(playerId).set({ name: playerName, ready: true, isOut: false });
         displayPlayerRole();
@@ -68,40 +66,50 @@ document.getElementById('reset-game-button').addEventListener('click', () => {
 });
 
 function startGame() {
-    fetch('words.json')
-        .then(response => response.json())
-        .then(data => {
-            const words = data.words;
-            const randomIndex = Math.floor(Math.random() * words.length);
-            const theme = words[randomIndex];
+    // **Reiniciar valores de los jugadores**
+    playersRef.once('value', (snapshot) => {
+        snapshot.forEach(childSnapshot => {
+            playersRef.child(childSnapshot.key).update({ isOut: false, votes: 0 });
+        });
 
-            gameRef.once('value', (snapshot) => {
-                const gameData = snapshot.val();
-                const clownsCount = parseInt(gameData.clowns, 10);
-                const blanksCount = parseInt(gameData.blanks, 10);
-                const roles = Array(playerCount - clownsCount - blanksCount).fill(theme).concat(
-                    Array(clownsCount).fill('Payaso'),
-                    Array(blanksCount).fill('Blanco')
-                );
+        // **Obtener palabra aleatoria y asignar roles**
+        fetch('words.json')
+            .then(response => response.json())
+            .then(data => {
+                const words = data.words;
+                const randomIndex = Math.floor(Math.random() * words.length);
+                const theme = words[randomIndex];
 
-                playersRef.once('value', (snapshot) => {
-                    const players = [];
-                    snapshot.forEach(childSnapshot => {
-                        players.push({ id: childSnapshot.key, data: childSnapshot.val() });
+                gameRef.once('value', (snapshot) => {
+                    const gameData = snapshot.val();
+                    const clownsCount = parseInt(gameData.clowns, 10);
+                    const blanksCount = parseInt(gameData.blanks, 10);
+                    const roles = Array(playerCount - clownsCount - blanksCount).fill(theme).concat(
+                        Array(clownsCount).fill('Payaso'),
+                        Array(blanksCount).fill('Blanco')
+                    );
+
+                    playersRef.once('value', (snapshot) => {
+                        const players = [];
+                        snapshot.forEach(childSnapshot => {
+                            players.push({ id: childSnapshot.key, data: childSnapshot.val() });
+                        });
+
+                        roles.sort(() => Math.random() - 0.5); // Mezclar roles
+
+                        players.forEach((player, index) => {
+                            playersRef.child(player.id).update({ role: roles[index] }); 
+                        });
+
+                        gameRef.update({ status: 'started', messages: 'La partida ha comenzado. Habla sobre el tema.', endTime: Date.now() + 90000 });
                     });
-
-                    roles.sort(() => Math.random() - 0.5); // Mezclar roles
-
-                    players.forEach((player, index) => {
-                        playersRef.child(player.id).update({ role: roles[index], votes: 0 }); // Reiniciar votos a 0
-                    });
-
-                    gameRef.update({ status: 'started', endTime: Date.now() + 500 });
                 });
-            });
-        })
-        .catch(error => console.error('Error al obtener palabra aleatoria del archivo JSON:', error));
+            })
+            .catch(error => console.error('Error al obtener palabra aleatoria del archivo JSON:', error));
+    });
 }
+
+
 function displayPlayerRole() {
     playersRef.child(playerId).child('role').on('value', (snapshot) => {
         const role = snapshot.val();
@@ -111,43 +119,81 @@ function displayPlayerRole() {
 }
 
 gameRef.child('status').on('value', (snapshot) => {
-    const statusMessage = snapshot.val();
-    if (statusMessage) {
-        document.getElementById('game-status').innerText = statusMessage;
-        if (statusMessage === 'reset') {
-            document.getElementById('game-info').style.display = 'none';
-        } else {
-            document.getElementById('game-info').style.display = 'block';
-        }
+    const status = snapshot.val();
+    if (status) {
+        updateFrontend(status);
     }
 });
 
-gameRef.on('value', (snapshot) => {
-    const gameData = snapshot.val();
-    if (gameData && gameData.status === 'started') {
-        document.getElementById('game-status').innerText = 'La partida ha comenzado. Habla sobre el tema sin decirlo explícitamente.';
-        setTimeout(initiateVoting, gameData.endTime - Date.now());
+gameRef.child('messages').on('value', (snapshot) => {
+    const message = snapshot.val();
+    if (message) {
+        document.getElementById('game-status').innerText = message;
+    }
+});
 
-        // Cambiar display de game-info a block
+function updateFrontend(status) {
+    clearInterval(countdownTimer); // Clear any existing timers
+
+    if (status === 'started') {
         document.getElementById('game-info').style.display = 'block';
-       
+        document.getElementById('voting-area').style.display = 'none';
+        document.getElementById('timer').style.display = 'block';
+        startCountdown();
+
+    } else if (status === 'voting') {
+        document.getElementById('game-info').style.display = 'block';
+        document.getElementById('voting-area').style.display = 'flex';
+        document.getElementById('timer').style.display = 'none';
+        initiateVoting();
+
+    } else if (status === 'continue') {
+        document.getElementById('game-info').style.display = 'block';
+        document.getElementById('voting-area').style.display = 'none';
+        document.getElementById('timer').style.display = 'block';
+        startCountdown();
+
+    } else if (status === 'reset') {
+        document.getElementById('game-info').style.display = 'none';
+        document.getElementById('voting-area').style.display = 'none';
+        document.getElementById('timer').style.display = 'none';
     }
-});
+}
+
+function startCountdown() {
+    const endTime = Date.now() + 90000; // 1:30 minutos
+
+    countdownTimer = setInterval(() => {
+        const now = Date.now();
+        const remainingTime = endTime - now;
+
+        if (remainingTime <= 0) {
+            clearInterval(countdownTimer);
+            gameRef.update({ status: 'voting', messages: 'La conversación ha terminado. Vota quién crees que es el Blanco:' });
+        } else {
+            const minutes = Math.floor(remainingTime / 60000);
+            const seconds = Math.floor((remainingTime % 60000) / 1000);
+            
+            document.getElementById('timer').innerText = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+        }
+    }, 1000);
+}
 
 function initiateVoting() {
-    document.getElementById('game-status').innerHTML = `
-        La conversación ha terminado. Vota quién crees que es el Blanco:
-        <div id="voting-area"></div>
-    `;
+    document.getElementById('game-status').innerText = 'Han empezado las votaciones';
     playersRef.once('value', (snapshot) => {
+        document.getElementById('voting-area').innerHTML = ''; // Clear previous buttons
+
         snapshot.forEach(childSnapshot => {
             const player = childSnapshot.val();
-            const button = document.createElement('button');
-            button.innerText = `${player.name}`;
-            button.addEventListener('click', () => {
-                vote(childSnapshot.key);
-            });
-            document.getElementById('voting-area').appendChild(button);
+            if (!player.isOut) {
+                const button = document.createElement('button');
+                button.innerText = `${player.name}`;
+                button.addEventListener('click', () => {
+                    vote(childSnapshot.key);
+                });
+                document.getElementById('voting-area').appendChild(button);
+            }
         });
     });
 }
@@ -166,12 +212,23 @@ function vote(votedPlayerId) {
         return player;
     }).then(() => {
         checkVotes();
+        document.getElementById('game-status').innerText = 'Esperando votos...';
+        document.getElementById('voting-area').style.display = 'none';
     });
 }
 
 function checkVotes() {
+    
     playersRef.once('value', (snapshot) => {
-        const totalPlayers = snapshot.numChildren();
+        let activePlayers = 0;
+
+        snapshot.forEach(childSnapshot => {
+            const player = childSnapshot.val();
+            if (!player.isOut) {
+                activePlayers++;
+            }
+        });
+
         let totalVotes = 0;
 
         snapshot.forEach(childSnapshot => {
@@ -181,10 +238,9 @@ function checkVotes() {
             }
         });
 
-        if (totalVotes === totalPlayers) {
+        if (totalVotes === activePlayers) {
             determineOutcome();
-        } else {
-            document.getElementById('game-status').innerHTML = '<div>Esperando votos de jugadores...</div>';
+            console.log("ei")
         }
     });
 }
@@ -212,54 +268,42 @@ function determineOutcome() {
         });
 
         if (tie) {
-            updateGameStatus('Hubo un empate. Nadie es expulsado.');
+            gameRef.update({ messages: 'Hubo un empate. Nadie es expulsado.' });
         } else if (votedOutPlayer) {
             const { id, role } = votedOutPlayer;
             playersRef.child(id).update({ isOut: true }).then(() => {
                 if (role === 'Blanco') {
-                    updateGameStatus(`${id} ha sido expulsado. Era el Blanco.`);
+                    gameRef.update({ messages: `${id} ha sido expulsado. Era el BLANCO.` });
                 } else if (role === 'Payaso') {
-                    updateGameStatus(`${id} ha sido expulsado. Era el payaso y ha ganado la partida.`);
+                    gameRef.update({ messages: `${id} ha sido expulsado. Era el PAYASO 🤡 y ha ganado.` });
                 } else {
-                    updateGameStatus(`${id} ha sido expulsado. Tenía tema.`);
+                    gameRef.update({ messages: `${id} ha sido expulsado y TENÍA TEMA. Continúa el juego.`, status: 'continue' });
+                    playersRef.once('value', (snapshot) => {
+                        snapshot.forEach(childSnapshot => {
+                            playersRef.child(childSnapshot.key).update({ votes: 0 });
+                        });
+                
+                    });
                 }
             });
         }
     });
 }
 
-function updateGameStatus(statusMessage) {
-    gameRef.update({ status: statusMessage }).then(() => {
-        displayGameStatus();
-    });
-}
-
-function displayGameStatus() {
-    gameRef.child('status').on('value', (snapshot) => {
-        const statusMessage = snapshot.val();
-        if (statusMessage) {
-            document.getElementById('game-status').innerText = statusMessage;
-        }
-    });
-}
-
-displayGameStatus();
-
 function resetGame() {
+    clearInterval(countdownTimer); // Clear any existing timers
+
+    gameRef.update({ status: 'reset', clowns: 0, blanks: 1, messages: '' });
     playersRef.remove();
-    gameRef.remove().then(() => {
-        // Después de borrar el gameRef, establecer valores por defecto de clowns, blanks y reset
-        gameRef.set({ clowns: 0, blanks: 1, status:'reset' });
-    });
-    document.getElementById('player-count').innerText = '0';
+
+    document.getElementById('player-name').removeAttribute('disabled');
+    document.getElementById('player-info').innerText = '';
     document.getElementById('game-status').innerText = '';
+    document.getElementById('timer').innerHTML = '';
     document.getElementById('voting-area').innerHTML = '';
-    document.getElementById('player-info').innerHTML = ''; 
-    playerId = null;
-    playerCount = 0;
+    document.getElementById('player-count').innerText = '0';
 }
 
-// Actualización en tiempo real de clowns y blanks
 const clownsSelect = document.getElementById('clowns');
 const blanksSelect = document.getElementById('blanks');
 
@@ -271,7 +315,6 @@ blanksSelect.addEventListener('change', (event) => {
     gameRef.update({ blanks: event.target.value });
 });
 
-// Inicializar valores de clowns y blanks en el frontend
 gameRef.on('value', (snapshot) => {
     const gameData = snapshot.val();
     if (gameData) {
