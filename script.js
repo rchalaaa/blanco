@@ -85,7 +85,7 @@ function startGame() {
                     const clownsCount = parseInt(gameData.clowns, 10);
                     const blanksCount = parseInt(gameData.blanks, 10);
                     const roles = Array(playerCount - clownsCount - blanksCount).fill(theme).concat(
-                        Array(clownsCount).fill('Payaso'),
+                        Array(clownsCount).fill(`Payaso / ${theme}`),
                         Array(blanksCount).fill('Blanco')
                     );
 
@@ -101,7 +101,11 @@ function startGame() {
                             playersRef.child(player.id).update({ role: roles[index] }); 
                         });
 
-                        gameRef.update({ status: 'started', messages: 'La partida ha comenzado. Habla sobre el tema.', endTime: Date.now() + 90000 });
+                        const newEndTime = Date.now() + 90000;
+                        gameRef.update({ status: 'started', messages: `La partida ha comenzado. Habla sobre el tema: ${theme}.`, endTime: newEndTime });
+
+                        // Notificar a todos los jugadores para que reinicien su temporizador
+                        gameRef.child('endTime').set(newEndTime);
                     });
                 });
             })
@@ -132,27 +136,26 @@ gameRef.child('messages').on('value', (snapshot) => {
     }
 });
 
+gameRef.child('endTime').on('value', (snapshot) => {
+    const endTime = snapshot.val();
+    if (endTime) {
+        clearInterval(countdownTimer);
+        startCountdown(endTime);
+    }
+});
+
 function updateFrontend(status) {
     clearInterval(countdownTimer); // Clear any existing timers
 
-    if (status === 'started') {
+    if (status === 'started' || status === 'continue') {
         document.getElementById('game-info').style.display = 'block';
         document.getElementById('voting-area').style.display = 'none';
         document.getElementById('timer').style.display = 'block';
-        startCountdown();
-
     } else if (status === 'voting') {
         document.getElementById('game-info').style.display = 'block';
         document.getElementById('voting-area').style.display = 'flex';
         document.getElementById('timer').style.display = 'none';
         initiateVoting();
-
-    } else if (status === 'continue') {
-        document.getElementById('game-info').style.display = 'block';
-        document.getElementById('voting-area').style.display = 'none';
-        document.getElementById('timer').style.display = 'block';
-        startCountdown();
-
     } else if (status === 'reset') {
         document.getElementById('game-info').style.display = 'none';
         document.getElementById('voting-area').style.display = 'none';
@@ -160,9 +163,7 @@ function updateFrontend(status) {
     }
 }
 
-function startCountdown() {
-    const endTime = Date.now() + 90000; // 1:30 minutos
-
+function startCountdown(endTime) {
     countdownTimer = setInterval(() => {
         const now = Date.now();
         const remainingTime = endTime - now;
@@ -218,7 +219,6 @@ function vote(votedPlayerId) {
 }
 
 function checkVotes() {
-    
     playersRef.once('value', (snapshot) => {
         let activePlayers = 0;
 
@@ -240,7 +240,6 @@ function checkVotes() {
 
         if (totalVotes === activePlayers) {
             determineOutcome();
-            console.log("ei")
         }
     });
 }
@@ -282,7 +281,6 @@ function determineOutcome() {
                         snapshot.forEach(childSnapshot => {
                             playersRef.child(childSnapshot.key).update({ votes: 0 });
                         });
-                
                     });
                 }
             });
