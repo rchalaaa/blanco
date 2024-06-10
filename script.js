@@ -272,9 +272,9 @@ function determineOutcome() {
             const { id, role } = votedOutPlayer;
             playersRef.child(id).update({ isOut: true }).then(() => {
                 if (role === 'Blanco') {
-                    gameRef.update({ messages: `${id} ha sido expulsado. Era el BLANCO.` });
+                    gameRef.update({ messages: `${id} ha sido expulsado. Era el BLANCO.`, endTime: ""  });
                 } else if (role === 'Payaso') {
-                    gameRef.update({ messages: `${id} ha sido expulsado. Era el PAYASO 🤡 y ha ganado.` });
+                    gameRef.update({ messages: `${id} ha sido expulsado. Era el PAYASO 🤡 y ha ganado.`, endTime: "" });
                 } else {
                     gameRef.update({ messages: `${id} ha sido expulsado y TENÍA TEMA. Continúa el juego.`, status: 'continue' });
                     playersRef.once('value', (snapshot) => {
@@ -291,7 +291,7 @@ function determineOutcome() {
 function resetGame() {
     clearInterval(countdownTimer); // Clear any existing timers
 
-    gameRef.update({ status: 'reset', clowns: 0, blanks: 1, messages: '' });
+    gameRef.update({ status: 'reset', clowns: 0, blanks: 1, messages: '', endTime: ''});
     playersRef.remove();
 
     document.getElementById('player-name').removeAttribute('disabled');
