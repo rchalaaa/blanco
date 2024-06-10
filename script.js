@@ -102,7 +102,7 @@ function startGame() {
                         });
 
                         const newEndTime = Date.now() + 90000;
-                        gameRef.update({ status: 'started', messages: `La partida ha comenzado. Habla sobre el tema: ${theme}.`, endTime: newEndTime });
+                        gameRef.update({ status: 'started', messages: `La partida ha comenzado. Habla sobre el tema`, endTime: newEndTime });
 
                         // Notificar a todos los jugadores para que reinicien su temporizador
                         gameRef.child('endTime').set(newEndTime);
