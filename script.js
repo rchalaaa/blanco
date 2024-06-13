@@ -116,18 +116,11 @@ function startGame() {
 
 function displayPlayerRole() {
     playersRef.child(playerId).child('role').on('value', (snapshot) => {
-      const role = snapshot.val();
-      const playerInfoElement = document.getElementById('player-info');
-      
-      if (role === 'Blanco') {
-        playerInfoElement.innerText = 'Blanco';
-        playerInfoElement.classList.add('blanco');
-      } else {
-        playerInfoElement.innerText = role;
-        playerInfoElement.classList.remove('blanco');
-      }
+        const role = snapshot.val();
+        const playerInfo = document.getElementById('player-info');
+        playerInfo.innerText = `${role === 'Blanco' ? 'Blanco' : role}`;
     });
-  }
+}
 
 gameRef.child('status').on('value', (snapshot) => {
     const status = snapshot.val();
