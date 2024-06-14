@@ -101,7 +101,7 @@ function startGame() {
                             playersRef.child(player.id).update({ role: roles[index] }); 
                         });
 
-                        const newEndTime = Date.now() + 90000;
+                        const newEndTime = Date.now() + 9000;
                         gameRef.update({ status: 'started', messages: `La partida ha comenzado. Habla sobre el tema`, endTime: newEndTime });
 
                         // Notificar a todos los jugadores para que reinicien su temporizador
@@ -279,10 +279,10 @@ function determineOutcome() {
             playersRef.child(id).update({ isOut: true }).then(() => {
                 if (role === 'Blanco') {
                     gameRef.update({ messages: `${id} ha sido expulsado. Era el BLANCO.`, endTime: "", status: 'stop'});
-                } else if (role === 'Payaso') {
+                } else if (role.includes('Payaso')) {
                     gameRef.update({ messages: `${id} ha sido expulsado. Era el PAYASO 🤡 y ha ganado.`, endTime: "", status: 'stop'});
                 } else {
-                    const newEndTime = Date.now() + 90000; // Nuevo tiempo de finalización
+                    const newEndTime = Date.now() + 9000; // Nuevo tiempo de finalización
                     gameRef.update({ messages: `${id} ha sido expulsado y TENÍA TEMA. Continúa el juego.`, status: 'continue', endTime: newEndTime });
 
                     playersRef.once('value', (snapshot) => {
@@ -295,6 +295,7 @@ function determineOutcome() {
         }
     });
 }
+
 
 
 function resetGame() {
