@@ -282,7 +282,7 @@ function determineOutcome() {
                 } else if (role === 'Payaso') {
                     gameRef.update({ messages: `${id} ha sido expulsado. Era el PAYASO 🤡 y ha ganado.`, endTime: "", status: 'stop'});
                 } else {
-                    const newEndTime = Date.now() + 9000; // Nuevo tiempo de finalización
+                    const newEndTime = Date.now() + 90000; // Nuevo tiempo de finalización
                     gameRef.update({ messages: `${id} ha sido expulsado y TENÍA TEMA. Continúa el juego.`, status: 'continue', endTime: newEndTime });
 
                     playersRef.once('value', (snapshot) => {
