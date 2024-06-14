@@ -136,13 +136,7 @@ gameRef.child('messages').on('value', (snapshot) => {
     }
 });
 
-gameRef.child('endTime').on('value', (snapshot) => {
-    const endTime = snapshot.val();
-    if (endTime) {
-        clearInterval(countdownTimer);
-        startCountdown(endTime);
-    }
-});
+
 
 function updateFrontend(status) {
     clearInterval(countdownTimer); // Clear any existing timers
@@ -151,6 +145,13 @@ function updateFrontend(status) {
         document.getElementById('game-info').style.display = 'block';
         document.getElementById('voting-area').style.display = 'none';
         document.getElementById('timer').style.display = 'block';
+        gameRef.child('endTime').on('value', (snapshot) => {
+            const endTime = snapshot.val();
+            if (endTime) {
+                clearInterval(countdownTimer);
+                startCountdown(endTime);
+            }
+        });
     } else if (status === 'voting') {
         document.getElementById('game-info').style.display = 'block';
         document.getElementById('voting-area').style.display = 'flex';
@@ -158,6 +159,10 @@ function updateFrontend(status) {
         initiateVoting();
     } else if (status === 'reset') {
         document.getElementById('game-info').style.display = 'none';
+        document.getElementById('voting-area').style.display = 'none';
+        document.getElementById('timer').style.display = 'none';   
+    } else if (status === 'stop') {
+        document.getElementById('game-info').style.display = 'block';
         document.getElementById('voting-area').style.display = 'none';
         document.getElementById('timer').style.display = 'none';
     }
@@ -179,6 +184,7 @@ function startCountdown(endTime) {
         }
     }, 1000);
 }
+
 
 function initiateVoting() {
     document.getElementById('game-status').innerText = 'Han empezado las votaciones';
@@ -272,11 +278,13 @@ function determineOutcome() {
             const { id, role } = votedOutPlayer;
             playersRef.child(id).update({ isOut: true }).then(() => {
                 if (role === 'Blanco') {
-                    gameRef.update({ messages: `${id} ha sido expulsado. Era el BLANCO.`, endTime: ""  });
+                    gameRef.update({ messages: `${id} ha sido expulsado. Era el BLANCO.`, endTime: "", status: 'stop'});
                 } else if (role === 'Payaso') {
-                    gameRef.update({ messages: `${id} ha sido expulsado. Era el PAYASO 🤡 y ha ganado.`, endTime: "" });
+                    gameRef.update({ messages: `${id} ha sido expulsado. Era el PAYASO 🤡 y ha ganado.`, endTime: "", status: 'stop'});
                 } else {
-                    gameRef.update({ messages: `${id} ha sido expulsado y TENÍA TEMA. Continúa el juego.`, status: 'continue' });
+                    const newEndTime = Date.now() + 9000; // Nuevo tiempo de finalización
+                    gameRef.update({ messages: `${id} ha sido expulsado y TENÍA TEMA. Continúa el juego.`, status: 'continue', endTime: newEndTime });
+
                     playersRef.once('value', (snapshot) => {
                         snapshot.forEach(childSnapshot => {
                             playersRef.child(childSnapshot.key).update({ votes: 0 });
@@ -287,6 +295,7 @@ function determineOutcome() {
         }
     });
 }
+
 
 function resetGame() {
     clearInterval(countdownTimer); // Clear any existing timers
